@@ -1,0 +1,72 @@
+<footer class="player">
+  <div class="now">
+    <div class="now-cover">
+      @if (player.current(); as track) {
+        <app-cover [src]="track.coverUrl" alt="" [seed]="track.albumTitle" />
+      }
+    </div>
+    <div class="now-copy">
+      @if (player.current(); as track) {
+        <strong>{{ track.title }}</strong>
+        <span>
+          @for (artist of track.artists; track artist.id; let last = $last) {
+            <a [routerLink]="['/artists', artist.id]">{{ artist.name }}</a>{{ last ? '' : ', ' }}
+          }@if (track.artists.length) { · }
+          <a [routerLink]="['/albums', track.albumId]">{{ track.albumTitle }}</a>
+        </span>
+        @if (player.error()) {
+          <span class="player-error">{{ player.error() }}</span>
+        }
+      } @else {
+        <strong>Nothing playing</strong>
+        <span>Pick a track from the shelf.</span>
+      }
+    </div>
+  </div>
+
+  <div class="transport">
+    <div class="transport-buttons">
+      <button type="button" class="icon-btn" aria-label="Previous" [disabled]="!player.current()" (click)="player.previous()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2.2v14H6zM18.5 5.5v13L9.2 12z"/></svg>
+      </button>
+      <button type="button" class="icon-btn play" [attr.aria-label]="player.isPlaying() ? 'Pause' : 'Play'" [disabled]="!player.current()" (click)="player.toggle()">
+        @if (player.isPlaying()) {
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h4.2v14H6zM13.8 5H18v14h-4.2z"/></svg>
+        } @else {
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.2v13.6l11-6.8z"/></svg>
+        }
+      </button>
+      <button type="button" class="icon-btn" aria-label="Next" [disabled]="!player.current()" (click)="player.next()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.8 5h2.2v14h-2.2zM5.5 5.5l9.3 6.5-9.3 6.5z"/></svg>
+      </button>
+    </div>
+    <div class="seek-row">
+      <span>{{ formatClock(player.currentTime()) }}</span>
+      <input
+        #seek
+        type="range"
+        min="0"
+        [max]="maxTime()"
+        step="0.1"
+        [value]="scrubbing() ? seek.value : player.currentTime()"
+        [disabled]="!player.current() || maxTime() <= 0"
+        aria-label="Seek"
+        (pointerdown)="startScrub()"
+        (pointerup)="finishScrub(seek)"
+        (change)="finishScrub(seek)" />
+      <span>{{ formatClock(maxTime()) }}</span>
+    </div>
+  </div>
+
+  <label class="volume">
+    Vol
+    <input
+      type="range"
+      min="0"
+      max="1"
+      step="0.01"
+      [value]="player.volume()"
+      aria-label="Volume"
+      (input)="setVolume($event)" />
+  </label>
+</footer>

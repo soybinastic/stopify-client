@@ -1,0 +1,135 @@
+@if (editor.request(); as request) {
+  <div class="modal-backdrop" (click)="close()">
+    <form
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="editor-title"
+      (click)="$event.stopPropagation()"
+      (ngSubmit)="save($event)">
+      <header class="modal-head">
+        <h2 id="editor-title">{{ heading(request) }}</h2>
+        <button type="button" class="text-btn" (click)="close()">Close</button>
+      </header>
+
+      @if (formError()) {
+        <p class="banner">{{ formError() }}</p>
+      }
+
+      @if (request.kind === 'artist') {
+        <div class="form-grid" [formGroup]="artistForm">
+          <label>
+            Name
+            <input formControlName="name" maxlength="200" required autofocus />
+            @if (submitted() && artistForm.controls.name.invalid) {
+              <span class="field-error">Name is required.</span>
+            }
+          </label>
+          <label>
+            Biography
+            <textarea formControlName="biography" maxlength="2000" rows="4"></textarea>
+          </label>
+          <label>
+            Image URL
+            <input formControlName="imageUrl" maxlength="1000" placeholder="https://" />
+            <span class="hint">Optional portrait. Leave blank for a generated cover.</span>
+          </label>
+        </div>
+      }
+
+      @if (request.kind === 'album') {
+        @if (!artists().length) {
+          <p class="banner">Add an artist before creating an album.</p>
+        }
+        <div class="form-grid" [formGroup]="albumForm">
+          <label>
+            Title
+            <input formControlName="title" maxlength="200" required autofocus />
+            @if (submitted() && albumForm.controls.title.invalid) {
+              <span class="field-error">Title is required.</span>
+            }
+          </label>
+          <label>
+            Artist
+            <select formControlName="artistId" required>
+              <option value="" disabled>Choose an artist</option>
+              @for (artist of artists(); track artist.id) {
+                <option [value]="artist.id">{{ artist.name }}</option>
+              }
+            </select>
+            @if (submitted() && albumForm.controls.artistId.invalid) {
+              <span class="field-error">Choose an artist.</span>
+            }
+          </label>
+          <label>
+            Release year
+            <input formControlName="releaseYear" type="number" min="1900" max="2100" placeholder="2026" />
+          </label>
+          <label>
+            Cover URL
+            <input formControlName="coverUrl" maxlength="1000" placeholder="https://" />
+            <span class="hint">Optional. A color cover is used when this is empty.</span>
+          </label>
+        </div>
+      }
+
+      @if (request.kind === 'track') {
+        @if (!albums().length) {
+          <p class="banner">Add an album before creating a track.</p>
+        }
+        @if (!artists().length) {
+          <p class="banner">Add an artist before creating a track.</p>
+        }
+        <div class="form-grid" [formGroup]="trackForm">
+          <label>
+            Title
+            <input formControlName="title" maxlength="200" required autofocus />
+            @if (submitted() && trackForm.controls.title.invalid) {
+              <span class="field-error">Title is required.</span>
+            }
+          </label>
+          <label>
+            Album
+            <select formControlName="albumId" required (change)="onAlbumChange()">
+              <option value="" disabled>Choose an album</option>
+              @for (album of albums(); track album.id) {
+                <option [value]="album.id">{{ album.artistName }} — {{ album.title }}</option>
+              }
+            </select>
+            @if (submitted() && trackForm.controls.albumId.invalid) {
+              <span class="field-error">Choose an album.</span>
+            }
+          </label>
+          <div class="stack-field">
+            <span>Artists</span>
+            <app-artist-multi-select formControlName="artistIds" [artists]="artists()" />
+            @if (submitted() && trackForm.controls.artistIds.invalid) {
+              <span class="field-error">Choose at least one artist.</span>
+            }
+            <span class="hint">Search and add every credited artist. Selection order is the credit order.</span>
+          </div>
+          <div class="split">
+            <label>
+              Track number
+              <input formControlName="trackNumber" type="number" min="1" max="500" required />
+            </label>
+            <label>
+              Duration
+              <input formControlName="duration" placeholder="3:45" required />
+            </label>
+          </div>
+          <label>
+            Audio URL
+            <input formControlName="audioUrl" maxlength="1000" placeholder="https://example.com/track.mp3" />
+            <span class="hint">Direct link to an mp3, ogg, or wav file. The player uses this URL.</span>
+          </label>
+        </div>
+      }
+
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" (click)="close()">Cancel</button>
+        <button type="submit" class="btn" [disabled]="saving()" (click)="save($event)">{{ saving() ? 'Saving…' : 'Save' }}</button>
+      </div>
+    </form>
+  </div>
+}

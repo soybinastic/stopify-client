@@ -1,0 +1,45 @@
+<section class="page">
+  <header class="page-head">
+    <div>
+      <p class="eyebrow">Catalog</p>
+      <h1>Albums</h1>
+    </div>
+    <button type="button" class="btn" (click)="editor.open({ kind: 'album', mode: 'create' })">New album</button>
+  </header>
+
+  <input class="search" type="search" placeholder="Search albums" [value]="query()" (input)="onQuery($event)" />
+
+  @if (loading()) {
+    <p class="status">Loading albums…</p>
+  } @else if (error()) {
+    <p class="banner">{{ error() }}</p>
+  } @else if (!filtered().length) {
+    <div class="empty">
+      <h2>{{ query() ? 'No albums match that search.' : 'No albums yet.' }}</h2>
+      @if (!query()) {
+        <p>Albums belong to an artist. Create an artist first if the shelf is still empty.</p>
+        <button type="button" class="btn" (click)="editor.open({ kind: 'album', mode: 'create' })">New album</button>
+      }
+    </div>
+  } @else {
+    <div class="card-grid">
+      @for (album of filtered(); track album.id) {
+        <article class="album-card">
+          <div class="cover-wrap">
+            <a class="cover-link" [routerLink]="['/albums', album.id]">
+              <app-cover [src]="album.coverUrl" alt="" [seed]="album.title" />
+            </a>
+            <button type="button" class="cover-play" [attr.aria-label]="'Play ' + album.title" (click)="player.playAlbum(album.id)">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.2v13.6l11-6.8z"/></svg>
+            </button>
+          </div>
+          <a class="card-title" [routerLink]="['/albums', album.id]">{{ album.title }}</a>
+          <p class="meta">
+            <a [routerLink]="['/artists', album.artistId]">{{ album.artistName }}</a>
+            @if (album.releaseYear) { <span> · {{ album.releaseYear }}</span> }
+          </p>
+        </article>
+      }
+    </div>
+  }
+</section>

@@ -1,0 +1,103 @@
+<section class="page">
+  <header class="page-head">
+    <div>
+      <p class="eyebrow">Stopify</p>
+      <h1>The shelf</h1>
+      <p class="lede">Add artists, group their albums, and put tracks on those albums. Anything with an audio URL plays in the bar below.</p>
+    </div>
+    <div class="row-actions">
+      <button type="button" class="btn" (click)="editor.open({ kind: 'artist', mode: 'create' })">New artist</button>
+      <button type="button" class="btn ghost" (click)="editor.open({ kind: 'album', mode: 'create' })">New album</button>
+      <button type="button" class="btn ghost" (click)="editor.open({ kind: 'track', mode: 'create' })">New track</button>
+    </div>
+  </header>
+
+  <input class="search" type="search" placeholder="Search the shelf" [value]="query()" (input)="onQuery($event)" />
+
+  @if (loading()) {
+    <p class="status">Loading the shelf…</p>
+  } @else if (error()) {
+    <p class="banner">{{ error() }}</p>
+  } @else if (!artists().length && !albums().length) {
+    <div class="empty">
+      <h2>The shelf is empty.</h2>
+      <p>Start with an artist. Albums belong to an artist, and tracks belong to an album.</p>
+      <button type="button" class="btn" (click)="editor.open({ kind: 'artist', mode: 'create' })">New artist</button>
+    </div>
+  } @else if (query() && !filteredAlbums().length && !filteredArtists().length && !filteredTracks().length) {
+    <div class="empty">
+      <h2>Nothing matches that search.</h2>
+    </div>
+  } @else {
+    @if (filteredAlbums().length) {
+      <div class="section-head">
+        <h2>Albums</h2>
+        <a routerLink="/albums">View all</a>
+      </div>
+      <div class="card-grid">
+        @for (album of filteredAlbums(); track album.id) {
+          <article class="album-card">
+            <div class="cover-wrap">
+              <a class="cover-link" [routerLink]="['/albums', album.id]">
+                <app-cover [src]="album.coverUrl" alt="" [seed]="album.title" />
+              </a>
+              <button type="button" class="cover-play" [attr.aria-label]="'Play ' + album.title" (click)="player.playAlbum(album.id)">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.2v13.6l11-6.8z"/></svg>
+              </button>
+            </div>
+            <a class="card-title" [routerLink]="['/albums', album.id]">{{ album.title }}</a>
+            <p class="meta">
+              <a [routerLink]="['/artists', album.artistId]">{{ album.artistName }}</a>
+              @if (album.releaseYear) { <span> · {{ album.releaseYear }}</span> }
+            </p>
+          </article>
+        }
+      </div>
+    }
+
+    @if (filteredArtists().length) {
+      <div class="section-head">
+        <h2>Artists</h2>
+        <a routerLink="/artists">View all</a>
+      </div>
+      <div class="artist-grid">
+        @for (artist of filteredArtists(); track artist.id) {
+          <a class="artist-card" [routerLink]="['/artists', artist.id]">
+            <span class="portrait">
+              <app-cover [src]="artist.imageUrl" alt="" [seed]="artist.name" />
+            </span>
+            <strong>{{ artist.name }}</strong>
+            <span>{{ artist.albumCount }} {{ artist.albumCount === 1 ? 'album' : 'albums' }}</span>
+          </a>
+        }
+      </div>
+    }
+
+    @if (filteredTracks().length) {
+      <div class="section-head">
+        <h2>Tracks</h2>
+      </div>
+      <ol class="tracks">
+        @for (track of filteredTracks(); track track.id) {
+          <li [class.playing]="player.current()?.id === track.id">
+            <button type="button" class="track-main" (click)="play(track)">
+              <span class="num">
+                @if (player.current()?.id === track.id && player.isPlaying()) {
+                  <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>
+                } @else {
+                  {{ track.trackNumber }}
+                }
+              </span>
+              <span class="titles">
+                <strong>{{ track.title }}</strong>
+                <small>{{ artistNames(track.artists) }} · {{ track.albumTitle }}</small>
+              </span>
+            </button>
+            <span class="time">{{ formatDuration(track.durationSeconds) }}</span>
+            <a class="text-btn" [routerLink]="['/albums', track.albumId]">Album</a>
+          </li>
+        }
+      </ol>
+    }
+  }
+</section>

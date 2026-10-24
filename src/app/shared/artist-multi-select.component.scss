@@ -1,0 +1,72 @@
+:host {
+  display: grid;
+  gap: 8px;
+  position: relative;
+  color: var(--text);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chips li {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(255, 107, 61, 0.16);
+  border: 1px solid rgba(255, 107, 61, 0.4);
+  border-radius: 999px;
+  padding: 0.15rem 0.25rem 0.15rem 0.7rem;
+  font-size: 0.88rem;
+}
+
+.chips button {
+  width: 1.45rem;
+  height: 1.45rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  line-height: 1;
+}
+
+.chips button:hover { color: var(--text); background: rgba(246, 241, 231, 0.08); }
+
+.combo { position: relative; }
+
+.menu {
+  position: fixed;
+  z-index: 30;
+  max-height: 180px;
+  overflow: auto;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--bg-raised);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+}
+
+.menu button {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  padding: 0.55rem 0.7rem;
+}
+
+.menu button.active,
+.menu button:hover { background: rgba(246, 241, 231, 0.08); }
+
+.empty {
+  padding: 0.55rem 0.7rem;
+  color: var(--faint);
+}

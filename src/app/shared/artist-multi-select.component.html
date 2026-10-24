@@ -1,0 +1,55 @@
+@if (selected().length) {
+  <ul class="chips">
+    @for (artist of selected(); track artist.id) {
+      <li>
+        {{ artist.name }}
+        <button type="button" [attr.aria-label]="'Remove ' + artist.name" (click)="remove(artist.id)">×</button>
+      </li>
+    }
+  </ul>
+}
+
+<div class="combo">
+  <input
+    #search
+    type="text"
+    role="combobox"
+    aria-autocomplete="list"
+    aria-label="Search artists"
+    [attr.aria-expanded]="open()"
+    [value]="query()"
+    [disabled]="disabled()"
+    placeholder="Search artists"
+    autocomplete="off"
+    (input)="onQuery($event)"
+    (focus)="openList()"
+    (blur)="onBlur()"
+    (keydown)="onKey($event)" />
+
+  @if (open()) {
+    <ul
+      class="menu"
+      role="listbox"
+      [style.top.px]="menuTop()"
+      [style.left.px]="menuLeft()"
+      [style.width.px]="menuWidth()">
+      @if (atLimit()) {
+        <li class="empty">A track can credit at most 12 artists.</li>
+      } @else {
+        @for (artist of matches(); track artist.id; let index = $index) {
+          <li role="option">
+            <button
+              type="button"
+              [class.active]="index === activeIndex()"
+              (mousedown)="pick(artist.id, $event)"
+              (mouseenter)="activeIndex.set(index)">
+              {{ artist.name }}
+            </button>
+          </li>
+        } @empty {
+          <li class="empty">No matching artists.</li>
+        }
+      }
+    </ul>
+  }
+</div>

@@ -1,0 +1,30 @@
+<div class="shell">
+  <aside class="sidebar">
+    <a class="brand" routerLink="/">
+      <span class="mark" aria-hidden="true"></span>
+      <span>Stopify</span>
+    </a>
+
+    <nav aria-label="Primary">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Library</a>
+      <a routerLink="/artists" routerLinkActive="active">Artists</a>
+      <a routerLink="/albums" routerLinkActive="active">Albums</a>
+    </nav>
+
+    <div class="sidebar-actions">
+      <p>Add to the shelf</p>
+      <button type="button" (click)="editor.open({ kind: 'artist', mode: 'create' })">New artist</button>
+      <button type="button" (click)="editor.open({ kind: 'album', mode: 'create' })">New album</button>
+      <button type="button" (click)="editor.open({ kind: 'track', mode: 'create' })">New track</button>
+    </div>
+
+    <p class="sidebar-note">Press space to play or pause.</p>
+  </aside>
+
+  <main class="main">
+    <router-outlet />
+  </main>
+</div>
+
+<app-player-bar />
+<app-editor-dialog />

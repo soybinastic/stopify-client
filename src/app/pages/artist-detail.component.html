@@ -1,0 +1,84 @@
+<section class="page">
+  @if (artist(); as artist) {
+    <div class="detail">
+      <div class="cover-frame round">
+        <app-cover [src]="artist.imageUrl" [alt]="artist.name" [seed]="artist.name" />
+      </div>
+      <div>
+        <p class="eyebrow">Artist</p>
+        <h1>{{ artist.name }}</h1>
+        @if (artist.biography) {
+          <p class="lede">{{ artist.biography }}</p>
+        }
+        <div class="row-actions">
+          <button type="button" class="btn" (click)="createAlbum()">New album</button>
+          <button type="button" class="btn ghost" (click)="edit()">Edit</button>
+          <button type="button" class="btn ghost" (click)="remove()">{{ confirming() ? 'Confirm delete' : 'Delete' }}</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <h2>Albums</h2>
+    </div>
+
+    @if (!artist.albums.length) {
+      <div class="empty">
+        <h2>No albums yet.</h2>
+        <p>Add an album, then add the tracks that belong on it.</p>
+        <button type="button" class="btn" (click)="createAlbum()">New album</button>
+      </div>
+    } @else {
+      <div class="card-grid">
+        @for (album of artist.albums; track album.id) {
+          <article class="album-card">
+            <div class="cover-wrap">
+              <a class="cover-link" [routerLink]="['/albums', album.id]">
+                <app-cover [src]="album.coverUrl" alt="" [seed]="album.title" />
+              </a>
+              <button type="button" class="cover-play" [attr.aria-label]="'Play ' + album.title" (click)="player.playAlbum(album.id)">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.2v13.6l11-6.8z"/></svg>
+              </button>
+            </div>
+            <a class="card-title" [routerLink]="['/albums', album.id]">{{ album.title }}</a>
+            <p class="meta">
+              {{ album.trackCount }} {{ album.trackCount === 1 ? 'track' : 'tracks' }}
+              @if (album.releaseYear) { <span> · {{ album.releaseYear }}</span> }
+            </p>
+          </article>
+        }
+      </div>
+    }
+
+    @if (artist.tracks.length) {
+      <div class="section-head">
+        <h2>Tracks</h2>
+      </div>
+      <ol class="tracks">
+        @for (track of artist.tracks; track track.id) {
+          <li [class.playing]="player.current()?.id === track.id">
+            <button type="button" class="track-main" (click)="play(track)">
+              <span class="num">
+                @if (player.current()?.id === track.id && player.isPlaying()) {
+                  <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>
+                } @else {
+                  {{ track.trackNumber }}
+                }
+              </span>
+              <span class="titles">
+                <strong>{{ track.title }}</strong>
+                <small>{{ artistNames(track.artists) }} · {{ track.albumTitle }}</small>
+              </span>
+            </button>
+            <span class="time">{{ formatDuration(track.durationSeconds) }}</span>
+            <a class="text-btn" [routerLink]="['/albums', track.albumId]">Album</a>
+          </li>
+        }
+      </ol>
+    }
+  } @else if (loading()) {
+    <p class="status">Loading artist…</p>
+  } @else if (error()) {
+    <p class="banner">{{ error() }}</p>
+  }
+</section>

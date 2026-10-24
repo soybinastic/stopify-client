@@ -1,0 +1,37 @@
+<section class="page">
+  <header class="page-head">
+    <div>
+      <p class="eyebrow">Catalog</p>
+      <h1>Artists</h1>
+    </div>
+    <button type="button" class="btn" (click)="editor.open({ kind: 'artist', mode: 'create' })">New artist</button>
+  </header>
+
+  <input class="search" type="search" placeholder="Search artists" [value]="query()" (input)="onQuery($event)" />
+
+  @if (loading()) {
+    <p class="status">Loading artists…</p>
+  } @else if (error()) {
+    <p class="banner">{{ error() }}</p>
+  } @else if (!filtered().length) {
+    <div class="empty">
+      <h2>{{ query() ? 'No artists match that search.' : 'No artists yet.' }}</h2>
+      @if (!query()) {
+        <p>An artist holds the albums and tracks you want to play.</p>
+        <button type="button" class="btn" (click)="editor.open({ kind: 'artist', mode: 'create' })">New artist</button>
+      }
+    </div>
+  } @else {
+    <div class="artist-grid">
+      @for (artist of filtered(); track artist.id) {
+        <a class="artist-card" [routerLink]="['/artists', artist.id]">
+          <span class="portrait">
+            <app-cover [src]="artist.imageUrl" alt="" [seed]="artist.name" />
+          </span>
+          <strong>{{ artist.name }}</strong>
+          <span>{{ artist.albumCount }} {{ artist.albumCount === 1 ? 'album' : 'albums' }}</span>
+        </a>
+      }
+    </div>
+  }
+</section>

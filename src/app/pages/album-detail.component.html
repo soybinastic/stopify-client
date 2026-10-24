@@ -1,0 +1,64 @@
+<section class="page">
+  @if (album(); as album) {
+    <div class="detail">
+      <div class="cover-frame">
+        <app-cover [src]="album.coverUrl" [alt]="album.title" [seed]="album.title" />
+      </div>
+      <div>
+        <p class="eyebrow">Album</p>
+        <h1>{{ album.title }}</h1>
+        <p class="meta">
+          <a [routerLink]="['/artists', album.artistId]">{{ album.artistName }}</a>
+          @if (album.releaseYear) { <span> · {{ album.releaseYear }}</span> }
+          <span> · {{ album.tracks.length }} {{ album.tracks.length === 1 ? 'track' : 'tracks' }}</span>
+        </p>
+        <div class="row-actions">
+          <button type="button" class="btn" (click)="play()" [disabled]="!album.tracks.length">Play</button>
+          <button type="button" class="btn ghost" (click)="createTrack()">Add track</button>
+          <button type="button" class="btn ghost" (click)="edit()">Edit</button>
+          <button type="button" class="btn ghost" (click)="remove()">{{ confirming() ? 'Confirm delete' : 'Delete' }}</button>
+        </div>
+      </div>
+    </div>
+
+    @if (!album.tracks.length) {
+      <div class="empty">
+        <h2>No tracks on this album.</h2>
+        <p>Add a track and, if you have one, paste a direct audio URL so it can play.</p>
+        <button type="button" class="btn" (click)="createTrack()">Add track</button>
+      </div>
+    } @else {
+      <ol class="tracks">
+        @for (track of album.tracks; track track.id) {
+          <li [class.playing]="player.current()?.id === track.id">
+            <button type="button" class="track-main" (click)="play(track)">
+              <span class="num">
+                @if (player.current()?.id === track.id && player.isPlaying()) {
+                  <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>
+                } @else {
+                  {{ track.trackNumber }}
+                }
+              </span>
+              <span class="titles">
+                <strong>{{ track.title }}</strong>
+                <small>
+                  {{ artistNames(track.artists) }}
+                  @if (!track.audioUrl) { <span> · No audio URL</span> }
+                </small>
+              </span>
+            </button>
+            <span class="time">{{ formatDuration(track.durationSeconds) }}</span>
+            <button type="button" class="text-btn" (click)="editTrack(track)">Edit</button>
+            <button type="button" class="text-btn" (click)="removeTrack(track)">
+              {{ pendingTrackId() === track.id ? 'Confirm' : 'Delete' }}
+            </button>
+          </li>
+        }
+      </ol>
+    }
+  } @else if (loading()) {
+    <p class="status">Loading album…</p>
+  } @else if (error()) {
+    <p class="banner">{{ error() }}</p>
+  }
+</section>
